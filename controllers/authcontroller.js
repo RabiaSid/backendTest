@@ -74,7 +74,44 @@ const AuthController = {
       }
     } catch (error) {}
   },
-  protected: () => {},
+  protected: async (req, res, next) => {
+    // 'Bearer jdflsdlfsjhlkdfjslkdfjhshfdkjshfdkjshdfkshdfkj'
+    let token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      res.status(401).send(SendResponse(false, "Un Authorized"));
+      return;
+    } else {
+      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        if (err) {
+          res.status(401).send(SendResponse(false, "Un Authorized"));
+          return;
+        } else {
+          next();
+          return;
+        }
+      });
+    }
+  },
+  adminProtected: async (req, res, next) => {
+    // 'Bearer jdflsdlfsjhlkdfjslkdfjhshfdkjshfdkjshdfkshdfkj'
+    let token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      res.status(401).send(SendResponse(false, "Un Authorized"));
+      return;
+    } else {
+      jwt.verify(token, process.env.SECRET_KEY, (err, decoded) => {
+        if (err) {
+          res.status(401).send(SendResponse(false, "Un Authorized"));
+          return;
+        } else {
+          if (decoded._doc.role == "admin") {
+            next();
+            return;
+          }
+        }
+      });
+    }
+  },
 };
 
 module.exports = AuthController;
